@@ -1,0 +1,14 @@
+Package: pp.prototypes
+Type: Package
+Title: Public Pensions Prototypes
+Version: 0.1
+Date: 2015-05-24
+Authors@R: person("Boyd", "Don", email = "donboyd5@gmail.com",
+  role = c("aut", "cre"))
+Description: Data frame with data for prototypical public pension plans, to be used in pension simulation project.
+Depends:
+    R (>= 2.10)
+Suggests:
+    dplyr
+License: GPL-2
+LazyData: TRUE
