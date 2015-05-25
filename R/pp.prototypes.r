@@ -5,5 +5,5 @@
 #' \code{\link{retirees}} Dataframe of retirees for prototypical public pension plans\cr
 #'
 #' @docType package
-#' @name ppprototypes
+#' @name pp.prototypes
 NULL

@@ -1,4 +1,4 @@
-# pp_prototypes.
+# pp.prototypes.
 
 This package contains data on prototypical public pension plans
 

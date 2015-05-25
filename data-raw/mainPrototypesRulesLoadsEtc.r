@@ -25,6 +25,8 @@ library("readxl")
 library("stringr")
 library("tidyr")
 
+
+library("XLConnect") # slow but convenient because it reads ranges
 library("xlsx")
 
 library("devtools")
@@ -45,6 +47,31 @@ library("btools")
 #                    Global variables and directories ####
 #****************************************************************************************************
 draw <- "./data-raw/"
+
+protofn <- "PrototypeAnalysis(4).xlsx"
+
+#****************************************************************************************************
+#                    Functions ####
+#****************************************************************************************************
+
+splong <- function(df, fillvar, fitrange=NULL, method = "natural"){
+  ## spline smoothing
+  # df should have only 3 columns: fillvar, nonfillvar [in either order], and value
+  # or just 2 columns, with no nonfillvar
+  # last column ALWAYS must be the value var
+  valvar <- names(df)[length(names(df))]
+  nonfillvar <- setdiff(names(df), c(fillvar, valvar))
+  f <- function(x) {
+    if(is.null(fitrange)) fitrange <- min(x[, fillvar]):max(x[, fillvar])
+    spl <- spline(x[,fillvar], x[,valvar], xout=fitrange, method = method)
+    dfout <- data.frame(x=spl$x, y=spl$y)
+    names(dfout) <- c(fillvar,valvar)
+    return(dfout)
+  }
+  if(length(nonfillvar) > 0) dfl2 <- plyr::ddply(df, c(nonfillvar), f) else dfl2 <- f(df)
+  return(dfl2)
+}
+
 
 
 #****************************************************************************************************
