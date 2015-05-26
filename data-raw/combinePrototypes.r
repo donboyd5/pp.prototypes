@@ -20,3 +20,7 @@ use_data(salgrowth.hist, overwrite = TRUE)
 use_data(salgrowth.assume, overwrite = TRUE)
 
 
+# library(pp.prototypes)
+# actives
+# salgrowth.hist
+# load("./data/salgrowth.assume.rda")

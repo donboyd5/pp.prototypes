@@ -108,7 +108,7 @@ average <- list()
 average$actives <- actives
 average$retirees <- retirees
 average$salgrowth.hist <- salgrowth.hist
-average$salgrowth.hist <- salgrowth.assume
+average$salgrowth.assume <- salgrowth.assume
 average
 
 saveRDS(average, paste0(draw, "average.rds"))

@@ -107,6 +107,7 @@ underfunded <- list()
 underfunded$actives <- actives
 underfunded$retirees <- retirees
 underfunded$salgrowth.hist <- salgrowth.hist
+underfunded$salgrowth.assume <- salgrowth.assume
 underfunded
 
 saveRDS(underfunded, paste0(draw, "underfunded.rds"))
