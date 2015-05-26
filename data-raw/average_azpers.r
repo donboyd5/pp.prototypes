@@ -1,24 +1,21 @@
 
-# Construct underfunded high outflow prototype, based on PA-SERS
-# http://publicplansdata.org/reports/PA_PA-PSERS_AV_2013_92.pdf
+# Construct average prototype, based on AZ-SERS
+# http://publicplansdata.org/reports/AZ_AZ-SRS_AV_2013_6.pdf
 
-
-# based on data in the AV at
-
-baseplan <- "PA-PSERS"
-protoname <- "underfunded"
+baseplan <- "AZ-SERS"
+protoname <- "average"
 
 totactives <- 1000
-abratio <- 1.6
+abratio <- 2.1
 totretirees <- totactives / abratio
 
 
 #****************************************************************************************************
 #                    Actives ####
 #****************************************************************************************************
-# actives - numbered p.34 ####
+# actives - numbered ####
 # convert to the ea x age format
-range <- "A5:M25"  # include column headers, but NOT row or column totals
+range <- "A8:L32"  # include column headers, but NOT row or column totals
 (df <- readWorksheetFromFile(paste0(draw, protofn), sheet=paste0(baseplan, ".Actives"), header=TRUE, region=range, colTypes="character"))
 
 df2 <- df %>% gather(yos, value, -order, -type, -midage, -agegrp) %>%
@@ -35,7 +32,7 @@ sum(df2$nactives * df2$salary) / sum(df2$nactives) # grand average salary
 
 # good - now finish up
 actives <- df2 %>% mutate(planname=protoname,
-                          nactives=nactives / sum(nactives) * totactives) %>% # totactives is a parameter above
+         nactives=nactives / sum(nactives) * totactives) %>% # totactives is a parameter above
   select(planname, age, ea, nactives, salary) %>%
   arrange(ea, age)
 
@@ -49,9 +46,9 @@ sum(actives$nactives * actives$salary) / sum(actives$nactives) # grand average s
 #                    Retirees ####
 #****************************************************************************************************
 
-# repeat for retirees p.35 ####
+# repeat for retirees ####
 # NOTE THAT WE ONLY NEED THE TOTALS COLUMN
-range <- "A4:N24"  # include column headers; for retirees, include column totals but not row totals
+range <- "A9:O29"  # include column headers; for retirees, include column totals but not row totals
 (df <- readWorksheetFromFile(paste0(draw, protofn), sheet=paste0(baseplan, ".Retirees"), header=TRUE, region=range, colTypes="character"))
 
 df2 <- df %>% select(type, age=midage, value=total) %>%
@@ -65,7 +62,7 @@ sum(df2$nretirees * df2$benefit) / sum(df2$nretirees) # grand average benefit
 
 # good - now finish up
 retirees <- df2 %>% mutate(planname=protoname,
-                           nretirees=nretirees / sum(nretirees) * totretirees) %>% # totactives is a parameter above
+                          nretirees=nretirees / sum(nretirees) * totretirees) %>% # totactives is a parameter above
   select(planname, age, nretirees, benefit) %>%
   arrange(age)
 
@@ -74,17 +71,21 @@ sum(retirees$nretirees)
 sum(retirees$nretirees * retirees$benefit) / sum(retirees$nretirees) # grand average benefit
 
 
+
+
 #****************************************************************************************************
 #                    Historical salary growth ####
 #****************************************************************************************************
-range <- "A4:B12"  # include column headers
+range <- "B4:C16"  # include column headers
 (df <- readWorksheetFromFile(paste0(draw, protofn), sheet=paste0(baseplan, ".SalGrowHist"), header=TRUE, region=range, colTypes="character"))
 
-# we can see that the rate is 0.0375 from age 55 on, so force that rather than let the spline make it different
-(df2 <- rbind(filter(df, age<55), data.frame(age=55:70, rate=0.0375)))
+# These data are on a yos basis. Conver to age basis (20:70) assuming entrance at 20
+df2 <- df %>% mutate(age=as.integer(c(20:29, 35, 40)),
+                     rate=cton(rate)) %>%
+  select(age, rate)
+(df3 <- rbind(df2, data.frame(age=41:70, rate=0.03)))
 
-
-salgrowth.hist <- splong(df2, "age", fitrange=20:70, method = "natural") %>%
+salgrowth.hist <- splong(df3, "age", fitrange=20:70, method = "natural") %>%
   mutate(planname=protoname,
          age=as.integer(age)) %>%
   select(planname, age, sscale.hist.rate=rate) %>%
@@ -103,12 +104,18 @@ salgrowth.assume <- salgrowth.hist %>% rename(sscale.assume.rate=sscale.hist.rat
 #                    Make the list and save ####
 #****************************************************************************************************
 
-underfunded <- list()
-underfunded$actives <- actives
-underfunded$retirees <- retirees
-underfunded$salgrowth.hist <- salgrowth.hist
-underfunded
+average <- list()
+average$actives <- actives
+average$retirees <- retirees
+average$salgrowth.hist <- salgrowth.hist
+average$salgrowth.hist <- salgrowth.assume
+average
 
-saveRDS(underfunded, paste0(draw, "underfunded.rds"))
+saveRDS(average, paste0(draw, "average.rds"))
+
+
+
+
+
 
 

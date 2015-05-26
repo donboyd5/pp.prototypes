@@ -1,29 +1,22 @@
 
 
+# Each prototype is a list with 4 data frames. Create 4 data frames, each of which has data for all prototypes.
+protonames <- c("average", "underfunded")
 
-uf <- readRDS(paste0(draw, "underfunded.rds"))
+getproto <- function(proto) readRDS(paste0(draw, paste0(proto, ".rds")))
+biglist <- llply(protonames, getproto)
 
-str(uf)
-uf$actives
+actives <- ldply(1:length(biglist), function(lnum) return(biglist[[lnum]]$actives))
+retirees <- ldply(1:length(biglist), function(lnum) return(biglist[[lnum]]$retirees))
+salgrowth.hist <- ldply(1:length(biglist), function(lnum) return(biglist[[lnum]]$salgrowth.hist))
+salgrowth.assume <- ldply(1:length(biglist), function(lnum) return(biglist[[lnum]]$salgrowth.assume))
 
 #****************************************************************************************************
-#                    Combine prototypes to create master dataframe of actives ####
+#                    Now save the combined data frames ####
 #****************************************************************************************************
-
-actives <- uf$actives
 use_data(actives, overwrite = TRUE)
-
-#****************************************************************************************************
-#                    Combine prototypes to create master dataframe of retirees ####
-#****************************************************************************************************
-retirees <- uf$retirees
 use_data(retirees, overwrite = TRUE)
-
-
-#****************************************************************************************************
-#                    Combine prototypes to create master dataframe of salary growth history ####
-#****************************************************************************************************
-salgrowth.hist <- uf$salgrowth.hist
 use_data(salgrowth.hist, overwrite = TRUE)
+use_data(salgrowth.assume, overwrite = TRUE)
 
 

@@ -48,7 +48,7 @@ library("btools")
 #****************************************************************************************************
 draw <- "./data-raw/"
 
-protofn <- "PrototypeAnalysis(4).xlsx"
+protofn <- "PrototypeAnalysis(6).xlsx"
 
 #****************************************************************************************************
 #                    Functions ####
@@ -82,7 +82,8 @@ splong <- function(df, fillvar, fitrange=NULL, method = "natural"){
 #
 # 1) Initial actives table -- number of actives and average salary, by age and ea, normalized to 1,000 actives
 # 2) Initial retirees table -- number of retirees and average benefit, by age
-# 3) Historical salary scale - to be used to construct salary history of the initial actives
+# 3) Historical salary - to be used to construct salary history of the initial actives
+# 4) Assumed salary growth - to be used for estimating future salaries
 
 # This program creates a set of prototype .rda files in the data-raw directory. Each such prototype contains an
 # actives df, a retirees df, and a salary growth df.
@@ -178,7 +179,7 @@ splong <- function(df, fillvar, fitrange=NULL, method = "natural"){
 
 
 #****************************************************************************************************
-#                    Salary growth rates by age ####
+#                    Historical salary growth rates by age ####
 #****************************************************************************************************
 
 # Dataframe with information on historical salary growth rates by age, to be used in the model to reconstruct salary history
@@ -225,6 +226,12 @@ splong <- function(df, fillvar, fitrange=NULL, method = "natural"){
 # wellfunded	69	0.0005
 # wellfunded	70
 
+
+#****************************************************************************************************
+#                    Assumed salary growth rates by age ####
+#****************************************************************************************************
+# Same format and concepts as the historical data
+# For now, the data also will be the same
 
 
 
