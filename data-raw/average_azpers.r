@@ -48,6 +48,7 @@ sum(actives$nactives * actives$salary) / sum(actives$nactives) # grand average s
 
 # repeat for retirees ####
 # NOTE THAT WE ONLY NEED THE TOTALS COLUMN
+# note multiplication by 12 because this is monthly
 range <- "A9:O29"  # include column headers; for retirees, include column totals but not row totals
 (df <- readWorksheetFromFile(paste0(draw, protofn), sheet=paste0(baseplan, ".Retirees"), header=TRUE, region=range, colTypes="character"))
 
@@ -56,13 +57,14 @@ df2 <- df %>% select(type, age=midage, value=total) %>%
          value=cton(value)) %>%
   spread(type, value) %>%
   filter(nretirees>0)
-# check total n actives and avg salary here before scaling
+# check total nretirees and avg benefit here before scaling and multiplying by 12
 sum(df2$nretirees)
 sum(df2$nretirees * df2$benefit) / sum(df2$nretirees) # grand average benefit
 
 # good - now finish up
 retirees <- df2 %>% mutate(planname=protoname,
-                          nretirees=nretirees / sum(nretirees) * totretirees) %>% # totactives is a parameter above
+                           benefit=benefit * 12, # monthly to annual
+                           nretirees=nretirees / sum(nretirees) * totretirees) %>% # totactives is a parameter above
   select(planname, age, nretirees, benefit) %>%
   arrange(age)
 
@@ -112,9 +114,6 @@ average$salgrowth.assume <- salgrowth.assume
 average
 
 saveRDS(average, paste0(draw, "average.rds"))
-
-
-
 
 
 
