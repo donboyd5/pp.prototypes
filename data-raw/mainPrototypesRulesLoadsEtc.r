@@ -30,9 +30,6 @@ library("xlsx")
 
 library("devtools")
 
-
-
-
 # load my packages last
 # devtools::install_github("donboyd5/apitools")
 # devtools::install_github("donboyd5/bdata")
@@ -51,20 +48,36 @@ draw <- "./data-raw/"
 
 protofn <- "PrototypeAnalysis(8).xlsx"
 
+active_ages <- list(); active_ages$min=20; active_ages$max=64
+retiree_ages <- list(); retiree_ages$min=65; retiree_ages$max=120
+
+
+
 #****************************************************************************************************
 #                    Functions ####
 #****************************************************************************************************
 
-ageea_adj <- function(df){
-  # force age and ea for actives to fall in 20:70 by putting any violations into the boundary case
+actives_ageea_adj <- function(df, minage, maxage) {
+  # force age and ea for actives to fall in the allowable range by putting any violations into the boundary case
   # and then collapsing any duplicate age-ea combinations, getting weighted average salary
-  df2 <- df %>% mutate(age=ifelse(age<20, 20, age),
-                       ea=ifelse(ea<20, 20, ea),
-                       age=ifelse(age>70, 70, age),
-                       ea=ifelse(ea>70, 70, ea)) %>%
+  df2 <- df %>% mutate(age=ifelse(age < minage, minage, age),
+                       ea=ifelse(ea < minage, minage, ea),
+                       age=ifelse(age > maxage, maxage, age),
+                       ea=ifelse(ea > maxage, maxage, ea)) %>%
     group_by(age, ea) %>%
     summarise(salary=sum(salary*nactives) / sum(nactives), # CAUTION: this must be done BEFORE changing the meaning of nactives
               nactives=sum(nactives))
+  return(df2)
+}
+
+retirees_age_adj <- function(df, minage, maxage) {
+  # force age for retirees to fall in the allowable range by putting any violations into the boundary case
+  # and then collapsing any duplicate ages, getting weighted average benefit
+  df2 <- df %>% mutate(age=ifelse(age < minage, minage, age),
+                       age=ifelse(age > maxage, maxage, age)) %>%
+    group_by(age) %>%
+    summarise(benefit=sum(benefit*nretirees) / sum(nretirees), # CAUTION: this must be done BEFORE changing the meaning of nretirees
+              nretirees=sum(nretirees))
   return(df2)
 }
 

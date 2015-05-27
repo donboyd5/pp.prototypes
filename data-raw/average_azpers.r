@@ -30,10 +30,10 @@ df2 <- df %>% gather(yos, value, -order, -type, -midage, -agegrp) %>%
 sum(df2$nactives)
 sum(df2$nactives * df2$salary) / sum(df2$nactives) # grand average salary
 
-# Now, adjust ages and entry ages as needed so that each fits in 20:70
-df3 <- ageea_adj(df2)
+# Now, adjust ages and entry ages as needed so that each fits in the allowable range
+df3 <- actives_ageea_adj(df2, active_ages$min, active_ages$max)
 
-# check nactives and tot salary
+# check nactives and average salary
 sum(df2$nactives); sum(df3$nactives)
 sum(df2$nactives * df2$salary) / sum(df2$nactives); sum(df3$nactives * df3$salary) / sum(df3$nactives)
 
@@ -49,6 +49,9 @@ glimpse(actives)
 filter(actives, age<ea) # should be zero rows
 sum(actives$nactives)
 sum(actives$nactives * actives$salary) / sum(actives$nactives) # grand average salary
+
+actives %>% select(age, ea, nactives) %>% spread(ea, nactives) %>% kable(digits=2)
+actives %>% select(age, ea, salary) %>% spread(ea, salary) %>% kable(digits=2)
 
 
 #****************************************************************************************************
@@ -70,8 +73,15 @@ df2 <- df %>% select(type, age=midage, value=total) %>%
 sum(df2$nretirees)
 sum(df2$nretirees * df2$benefit) / sum(df2$nretirees) # grand average benefit
 
+# Now, adjust ages and entry ages as needed so that each fits in the allowable range
+df3 <- retirees_age_adj(df2, retiree_ages$min, retiree_ages$max)
+
+# check nretirees and average benefit
+sum(df2$nretirees); sum(df3$nretirees)
+sum(df2$nretirees * df2$benefit) / sum(df2$nretirees); sum(df3$nretirees * df3$benefit) / sum(df3$nretirees)
+
 # good - now finish up
-retirees <- df2 %>% mutate(planname=protoname,
+retirees <- df3 %>% mutate(planname=protoname,
                            benefit=benefit * 12, # monthly to annual
                            nretirees=nretirees / sum(nretirees) * totretirees) %>% # totactives is a parameter above
   select(planname, age, nretirees, benefit) %>%
