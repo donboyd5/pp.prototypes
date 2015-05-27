@@ -54,6 +54,20 @@ protofn <- "PrototypeAnalysis(8).xlsx"
 #                    Functions ####
 #****************************************************************************************************
 
+ageea_adj <- function(df){
+  # force age and ea for actives to fall in 20:70 by putting any violations into the boundary case
+  # and then collapsing any duplicate age-ea combinations, getting weighted average salary
+  df2 <- df %>% mutate(age=ifelse(age<20, 20, age),
+                       ea=ifelse(ea<20, 20, ea),
+                       age=ifelse(age>70, 70, age),
+                       ea=ifelse(ea>70, 70, ea)) %>%
+    group_by(age, ea) %>%
+    summarise(salary=sum(salary*nactives) / sum(nactives), # CAUTION: this must be done BEFORE changing the meaning of nactives
+              nactives=sum(nactives))
+  return(df2)
+}
+
+
 splong <- function(df, fillvar, fitrange=NULL, method = "natural"){
   ## spline smoothing
   # df should have only 3 columns: fillvar, nonfillvar [in either order], and value

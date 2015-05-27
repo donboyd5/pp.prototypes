@@ -7,6 +7,7 @@ library("plyr")
 library("dplyr")
 library("tidyr")
 library("ggplot2")
+library("knitr")
 
 #data(package="pp.prototypes")
 ?actives
@@ -18,10 +19,17 @@ glimpse(actives)
 count(actives, planname)
 count(actives, age)
 count(actives, ea) %>% data.frame
+
+actives %>% filter(planname=="average") %>% select(age, ea, nactives) %>% spread(ea, nactives) %>% kable(digits=2)
+actives %>% filter(planname=="average") %>% select(age, ea, salary) %>% spread(ea, salary) %>% kable(digits=0)
+actives %>% filter(planname=="underfunded") %>% select(age, ea, nactives) %>% spread(ea, nactives) %>% kable(digits=2)
+actives %>% filter(planname=="underfunded") %>% select(age, ea, salary) %>% spread(ea, salary) %>% kable(digits=0)
+
 actives %>% group_by(planname) %>%
   summarise(age=sum(age*nactives) / sum(nactives),
             nactives.sum=sum(nactives), # rename so that it does not mess up next calculation
             salary=sum(salary*nactives) / sum(nactives))
+
 tmp <- actives %>% group_by(planname, age) %>%
   summarize(nactives.sum=sum(nactives), salary=sum(nactives*salary) / nactives.sum)
 qplot(age, nactives.sum, data=tmp, colour=planname, geom=c("point", "line"))

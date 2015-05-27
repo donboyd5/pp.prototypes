@@ -29,13 +29,23 @@ df2 <- df %>% gather(yos, value, -order, -type, -midage, -agegrp) %>%
   select(age, ea, value, type) %>%
   spread(type, value) %>%
   filter(nactives>0)
-# check total n actives and avg salary here before scaling
+
+# check total n actives and avg salary here to be sure we hit published numbers, before adjusting and scaling
 sum(df2$nactives)
 sum(df2$nactives * df2$salary) / sum(df2$nactives) # grand average salary
 
+# Now, adjust ages and entry ages as needed so that each fits in 20:70
+df3 <- ageea_adj(df2)
+
+# check nactives and tot salary
+sum(df2$nactives); sum(df3$nactives)
+sum(df2$nactives * df2$salary) / sum(df2$nactives); sum(df3$nactives * df3$salary) / sum(df3$nactives)
+
+
 # good - now finish up
-actives <- df2 %>% mutate(planname=protoname,
-                          nactives=nactives / sum(nactives) * totactives) %>% # totactives is a parameter above
+actives <- df3 %>% ungroup %>% # ungroup, just to be safe
+  mutate(planname=protoname,
+         nactives=nactives / sum(nactives) * totactives) %>% # totactives is a parameter above
   select(planname, age, ea, nactives, salary) %>%
   arrange(ea, age)
 
