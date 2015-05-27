@@ -25,7 +25,6 @@ library("readxl")
 library("stringr")
 library("tidyr")
 
-
 library("XLConnect") # slow but convenient because it reads ranges
 library("xlsx")
 
