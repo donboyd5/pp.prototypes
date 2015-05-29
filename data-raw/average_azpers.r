@@ -49,6 +49,9 @@ glimpse(actives)
 filter(actives, age<ea) # should be zero rows
 sum(actives$nactives)
 sum(actives$nactives * actives$salary) / sum(actives$nactives) # grand average salary
+sum(actives$nactives * actives$age) / sum(actives$nactives) # grand average age
+actives %>% mutate(yos=age-ea) %>% summarize(avgyos=sum(yos*nactives) / sum(nactives)) # grand average yos
+
 
 actives %>% select(age, ea, nactives) %>% spread(ea, nactives) %>% kable(digits=2)
 actives %>% select(age, ea, salary) %>% spread(ea, salary) %>% kable(digits=2)
@@ -125,15 +128,11 @@ salgrowth.assume <- salgrowth.hist %>% rename(sscale.assume.rate=sscale.hist.rat
 #                    Make the list and save ####
 #****************************************************************************************************
 
-average <- list()
-average$actives <- actives
-average$retirees <- retirees
-average$salgrowth.hist <- salgrowth.hist
-average$salgrowth.assume <- salgrowth.assume
-average
+make_plist(protoname, actives, retirees, salgrowth.hist, salgrowth.assume)
 
-saveRDS(average, paste0(draw, "average.rds"))
-
+# check
+tmp <- readRDS(paste0(draw, protoname, ".rds"))
+str(tmp)
 
 
 

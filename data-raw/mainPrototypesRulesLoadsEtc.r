@@ -4,6 +4,11 @@
 # - globals
 # - overview documentation
 
+# CRR locations for CAFRs and AVs
+#   for all     --	http://publicplansdata.org/reports/
+#   menu system --	http://publicplansdata.org/resources/download-avs-cafrs/
+
+
 
 #****************************************************************************************************
 #                    Load packages ####
@@ -46,7 +51,7 @@ library("btools")
 #****************************************************************************************************
 draw <- "./data-raw/"
 
-protofn <- "PrototypeAnalysis(8).xlsx"
+protofn <- "PrototypeAnalysis(10).xlsx"
 
 active_ages <- list(); active_ages$min=20; active_ages$max=64
 retiree_ages <- list(); retiree_ages$min=65; retiree_ages$max=120
@@ -99,6 +104,41 @@ splong <- function(df, fillvar, fitrange=NULL, method = "natural"){
   if(length(nonfillvar) > 0) dfl2 <- plyr::ddply(df, c(nonfillvar), f) else dfl2 <- f(df)
   return(dfl2)
 }
+
+
+splong2 <- function(df, fillvar, fitrange=NULL, method = "natural"){
+  ## spline smoothing
+  # df should have only 2 columns: fillvar, and valvar, where:
+  #   valvar is the variable to be interpolated - the y value
+  #   fillvar is the variable it corresponds to - the x value
+  #   fitrange is the set of NEW x values (fillvar values) for which we will get NEW interpolated y values (valvar)
+  # note the double-bracket indexing - i.,e., [[]] - a change from before. This ensures that the column selected is
+  # greated as a vector, which spline needs, rather than as a one-column data frame; dplyr's tbl_df "broke" the previous version
+  # so this is now better
+  valvar <- names(df)[length(names(df))]
+  nonfillvar <- setdiff(names(df), c(fillvar, valvar))
+  f <- function(x) {
+    if(is.null(fitrange)) fitrange <- min(x[, fillvar]):max(x[, fillvar])
+    spl <- spline(x[[fillvar]], x[[valvar]], xout=fitrange, method = method) # double brackets ensure we return a vector rather than 1-column dataframe
+    dfout <- data.frame(x=spl$x, y=spl$y)
+    names(dfout) <- c(fillvar,valvar)
+    return(dfout)
+  }
+  dfl2 <- f(df)
+  return(dfl2)
+}
+
+
+make_plist <- function(protoname, actives, retirees, salgrowth.hist, salgrowth.assume) {
+  plist <- list()
+  plist$actives <- actives
+  plist$retirees <- retirees
+  plist$salgrowth.hist <- salgrowth.hist
+  plist$salgrowth.assume <- salgrowth.assume
+  saveRDS(plist, paste0(draw, protoname, ".rds"))
+  return(NULL)
+}
+
 
 
 
