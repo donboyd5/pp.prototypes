@@ -1,7 +1,7 @@
 
 
 # Each prototype is a list with 4 data frames. Create 4 data frames, each of which has data for all prototypes.
-protonames <- c("average", "underfunded", "underfundedTeachers", "oldplan", "highabratio")
+protonames <- c("average", "underfunded", "underfundedTeachers", "oldplan", "highabratio", "youngplan")
 
 getproto <- function(proto) readRDS(paste0(draw, paste0(proto, ".rds")))
 biglist <- llply(protonames, getproto)
