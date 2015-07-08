@@ -66,5 +66,24 @@ retirees %>% group_by(planname) %>%
             age.avg=sum(age*nretirees) / nretirees.sum)
 
 
+# summary stats
+adf <- actives %>% group_by(planname) %>%
+  summarise(totactives=sum(nactives),
+            avgage.a=sum(age*nactives) / totactives,
+            avgyos=sum((age-ea)*nactives) / totactives,
+            avgsalary=sum(salary*nactives)/totactives)
+rdf <- retirees %>% group_by(planname) %>%
+  summarise(totretirees=sum(nretirees),
+            avgage.r=sum(age*nretirees) / totretirees,
+            avgbenefit=sum(benefit*nretirees) / totretirees)
+left_join(adf, rdf) %>% mutate(abratio=totactives / totretirees)
+
+actives %>% group_by(age, planname) %>%
+  summarise(nactives=sum(nactives)) %>%
+  qplot(age, nactives, data=., colour=planname, geom=c("point", "line"))
+
+retirees %>% group_by(planname) %>%
+  mutate(pctretirees=nretirees / sum(nretirees) * 100) %>%
+  qplot(age, pctretirees, data=., colour=planname, geom=c("point", "line"))
 
 
